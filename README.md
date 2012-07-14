@@ -11,7 +11,7 @@ and enter it. Doing this will make you a wanker.
 
 Who
 ===
-Andy Sloane
-Brendan Hickey
-Eric Dobson
-Preston Guillory
+* Andy Sloane
+* Brendan Hickey
+* Eric Dobson
+* Preston Guillory
