@@ -5,15 +5,16 @@
 using namespace std;
 
 bool Map::ReadFromStdin() {
-  height_ = 0; 
+  height_ = 0;
 
   string line;
-  while(cin >> line) {
-    if (line.size() == 0) {
+  while (getline(cin, line)) {
+    if (line.size() <= 1) {
       // empty line -> end of map; start parsing metadata, if any
       break;
     }
-    width_ = line.size();
+    if (width_ == 0) width_ = line.length();
+    // cout << "line " << height_ << " size " << line.length() << " " << line << endl;
 
     for (unsigned i=0; i<line.size(); i++) {
       switch (line[i]) {
@@ -41,6 +42,9 @@ bool Map::ReadFromStdin() {
         case 'L':   // exit (lambda lift)
           map_.push_back(EXIT);
           break;
+        default:
+          cerr << "Unrecognized map character " << line[i] << endl;
+          return false;
       }
     }
     height_ ++;
@@ -50,7 +54,7 @@ bool Map::ReadFromStdin() {
 
 bool State::ReadFromStdin() {
   map_.ReadFromStdin();
-  
+
   // TODO: flooding metadata
   //while(cin >> line) {
   //}
@@ -66,16 +70,7 @@ Delta Map::MakeMove(Move move) {
   return delta; //TODO
 }
 
-Terrain Map::TerrainAt(int x, int y) {
-  return map_[y * width_ + x];
-}
-
-void Map::SetTerrainAt(int x, int y, Terrain terrain) {
-  map_[y * width_ + x] = terrain;
-}
-
 bool Map::DoResolvedMove(ResolvedMove move, Delta delta) {
-
   int new_x = robot_x_, new_y = robot_y_;
   int new_rock_x = robot_x_, new_rock_y = robot_y_;
   bool push = false;
@@ -101,21 +96,21 @@ bool Map::DoResolvedMove(ResolvedMove move, Delta delta) {
       new_y += 1;
       break;
     case WAIT_R:
-      // Do Nothing. 
+      // Do Nothing.
       break;
   }
 
   //Copy old locations
   //rocks are set in update
-  delta.old_terrain_ = TerrainAt(new_x, new_y);
+  delta.old_terrain_ = terrain(new_x, new_y);
   delta.old_robot_x_ = robot_x_;
   delta.old_robot_y_ = robot_y_;
   delta.move_ = move;
 
-  if (TerrainAt(new_x, new_y) != EXIT)
-    SetTerrainAt(new_x, new_y, AIR);
+  if (terrain(new_x, new_y) != EXIT)
+    terrain(new_x, new_y) = AIR;
   if (push)
-    SetTerrainAt(new_rock_x, new_rock_y, ROCK);
+    terrain(new_rock_x, new_rock_y) = ROCK;
   robot_x_ = new_x;
   robot_y_ = new_y;
 
@@ -159,7 +154,7 @@ bool Map::Update(Delta delta) {
     }
   }
   //TODO add the rocks to delta
-  
+
 
   //TODO avoid the copy here
   map_ = new_map;
@@ -195,7 +190,7 @@ ResolvedMove Map::ResolveMove(Move move) {
   int new_x = robot_x_ + change_x;
   int new_y = robot_y_ + change_y;
 
-  Terrain new_space = TerrainAt(new_x,new_y);
+  Terrain new_space = terrain(new_x,new_y);
 
   switch (new_space) {
     case EXIT:
@@ -235,7 +230,7 @@ ResolvedMove Map::ResolveMove(Move move) {
         case RIGHT:
           int new_rock_x = new_x + change_x;
           int new_rock_y = new_y;
-          bool can_push = TerrainAt(new_rock_x, new_rock_y) == AIR;
+          bool can_push = terrain(new_rock_x, new_rock_y) == AIR;
           if (can_push) {
             return (move == LEFT) ? PUSH_LEFT_R : PUSH_RIGHT_R;
           } else {
@@ -247,9 +242,3 @@ ResolvedMove Map::ResolveMove(Move move) {
   //Should never happen
   return WAIT_R;
 }
-
-
-
-
-
-

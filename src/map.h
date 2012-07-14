@@ -37,12 +37,18 @@ class Map
     remaining_lambdas_ = 0;
   }
 
+  const Terrain& terrain(int x, int y) const { return map_[x+y*width_]; }
+  Terrain& terrain(int x, int y) { return map_[x+y*width_]; }
+  const Terrain& operator()(int x, int y) const { return map_[x+y*width_]; }
+  Terrain& operator()(int x, int y) { return map_[x+y*width_]; }
+
   bool ReadFromStdin();
 
   Delta MakeMove(Move move);
   ResolvedMove ResolveMove(Move move);
-  Terrain TerrainAt(int x, int y);
-  void SetTerrainAt(int x, int y, Terrain terrain);
+
+  int width() const { return width_; }
+  int height() const { return height_; }
 
  private:
   int width_, height_;
@@ -73,7 +79,6 @@ class State
   Map map_;
   int turn_, flood_rate_, water_proof_;
   int collected_lambdas_;
-
 };
 
 

@@ -11,5 +11,6 @@ int main()
     cout << "A\n";
     return -1;
   }
+  cerr << map.width() << "x" << map.height() << endl;
 }
 
