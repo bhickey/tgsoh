@@ -68,7 +68,7 @@ class State
   ~State() { }
 
   void Init() {
-    turn_ = flood_rate_ = water_proof_ = 0;
+    turn_ = flood_rate_ = water_ = water_proof_ = 0;
     collected_lambdas_ = 0;
   }
 
@@ -77,7 +77,7 @@ class State
 
  private:
   Map map_;
-  int turn_, flood_rate_, water_proof_;
+  int turn_, flood_rate_, water_, water_proof_;
   int collected_lambdas_;
 };
 

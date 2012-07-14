@@ -54,10 +54,21 @@ bool Map::ReadFromStdin() {
 
 bool State::ReadFromStdin() {
   map_.ReadFromStdin();
-
-  // TODO: flooding metadata
-  //while(cin >> line) {
-  //}
+  string line;
+  int value;
+  while(cin >> line >> value) {
+    switch (line.size()) {
+      case 5:   //Water
+        water_ = value;
+        break;
+      case 8:   //Flooding
+        flood_rate_ = value;
+        break;
+      case 10:  //Waterproof
+        water_proof_ = value;
+        break;
+    }
+  }
   return true;
 }
 
