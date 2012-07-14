@@ -2,6 +2,7 @@
 #define __TGSOH_MAP_HEADER__
 
 #include <vector>
+#include <iostream>
 #include "enums.h"
 
 class Delta
@@ -44,7 +45,7 @@ class Map
 
   bool ReadFromStdin();
 
-  Delta MakeMove(Move move);
+  bool MakeMove(Move move, Delta *delta);
   ResolvedMove ResolveMove(Move move);
 
   int width() const { return width_; }
@@ -56,10 +57,11 @@ class Map
   int remaining_lambdas_;
   std::vector<Terrain> map_;
 
-  bool DoResolvedMove(ResolvedMove move, Delta delta);
-  bool Update(Delta delta);
+  bool DoResolvedMove(ResolvedMove move, Delta *delta);
+  bool Update(Delta *delta);
 };
 
+extern std::ostream& operator<<(std::ostream& ostr, const Map& m);
 
 class State
 {

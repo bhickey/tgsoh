@@ -52,6 +52,16 @@ bool Map::ReadFromStdin() {
   return true;
 }
 
+ostream& operator<<(ostream& ostr, const Map& m) {
+  for (int j=0; j<m.height(); j++) {
+    for (int i=0; i<m.width(); i++) {
+      ostr << TerrainChar[static_cast<int>(m.terrain(i,j))];
+    }
+    ostr << endl;
+  }
+  return ostr;
+}
+
 bool State::ReadFromStdin() {
   map_.ReadFromStdin();
   string line;
@@ -73,15 +83,14 @@ bool State::ReadFromStdin() {
 }
 
 
-Delta Map::MakeMove(Move move) {
+bool Map::MakeMove(Move move, Delta *delta) {
   ResolvedMove move_r = ResolveMove(move);
-  Delta delta;
   bool rock_fell_on_head = DoResolvedMove(move_r, delta);
 
-  return delta; //TODO
+  return true; //TODO
 }
 
-bool Map::DoResolvedMove(ResolvedMove move, Delta delta) {
+bool Map::DoResolvedMove(ResolvedMove move, Delta *delta) {
   int new_x = robot_x_, new_y = robot_y_;
   int new_rock_x = robot_x_, new_rock_y = robot_y_;
   bool push = false;
@@ -113,10 +122,10 @@ bool Map::DoResolvedMove(ResolvedMove move, Delta delta) {
 
   //Copy old locations
   //rocks are set in update
-  delta.old_terrain_ = terrain(new_x, new_y);
-  delta.old_robot_x_ = robot_x_;
-  delta.old_robot_y_ = robot_y_;
-  delta.move_ = move;
+  delta->old_terrain_ = terrain(new_x, new_y);
+  delta->old_robot_x_ = robot_x_;
+  delta->old_robot_y_ = robot_y_;
+  delta->move_ = move;
 
   if (terrain(new_x, new_y) != EXIT)
     terrain(new_x, new_y) = EMPTY;
@@ -128,7 +137,7 @@ bool Map::DoResolvedMove(ResolvedMove move, Delta delta) {
   return Update(delta);
 }
 
-bool Map::Update(Delta delta) {
+bool Map::Update(Delta *delta) {
   //Updating from right to left is OK because it is equivalent
   vector<Terrain> new_map(map_);
 
@@ -178,25 +187,8 @@ ResolvedMove Map::ResolveMove(Move move) {
   if (move == WAIT || move == ABORT)
     return WAIT_R;
 
-  int change_x = 0, change_y = 0;
-  switch (move) {
-    case LEFT:
-      change_x = -1;
-      break;
-    case RIGHT:
-      change_x = 1;
-      break;
-    case UP:
-      change_y = -1;
-      break;
-    case DOWN:
-      change_y = 1;
-      break;
-    case WAIT:
-    case ABORT:
-      //Should never happen
-      return WAIT_R;
-  }
+  int change_x = MoveDX[static_cast<int>(move)],
+      change_y = MoveDY[static_cast<int>(move)];
 
   int new_x = robot_x_ + change_x;
   int new_y = robot_y_ + change_y;

@@ -1,5 +1,6 @@
-OBJS = $(patsubst %.cc,%.o,$(wildcard *.cc))
 TARGET = main
+OBJS = $(patsubst %.cc,%.o,$(wildcard *.cc))
+HEADERS = $(wildcard *.h)
 CXXFLAGS = -Wall -g -O3
 LDFLAGS =
 CXX = g++
@@ -15,3 +16,8 @@ $(TARGET): $(OBJS)
 .cc.o:
 	$(CXX) -c -o $@ $(CXXFLAGS) $<
 
+# update below with makedepend *.cc
+# DO NOT DELETE
+
+map.o: map.h enums.h
+solve.o: map.h enums.h

@@ -12,5 +12,8 @@ int solve()
     return -1;
   }
   cerr << map.width() << "x" << map.height() << endl;
+  cerr << map;
+
+  return 0;
 }
 
