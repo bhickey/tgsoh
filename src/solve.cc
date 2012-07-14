@@ -1,10 +1,14 @@
 #include <iostream>
+#include "enums.h"
+#include "io.h"
 #include "map.h"
 
 using namespace std;
 
 void output (int param) {
-  cout << "A";
+  vector<Move> moves;
+  moves.push_back(ABORT);
+  cout << moves;
   exit(0);
 }
 
@@ -28,7 +32,7 @@ int main()
   map.MakeMove(RIGHT, &d);
   cerr << map;
 
-#if 0
+#if 1
   while(true) {
    // do the stuff that matters
   }
