@@ -1,5 +1,5 @@
-#ifndef __TGSOH_IO_HEADER__
-#define __TGSOH_IO_HEADER__
+#ifndef __TGSOH_UTIL_HEADER__
+#define __TGSOH_UTIL_HEADER__
 
 #include <vector>
 #include <iostream>
@@ -11,4 +11,4 @@ std::ostream& operator<<(std::ostream& o, std::vector<Move> &moves);
 
 char atoi(const std::string str);
 
-#endif /* __TGSOH_IO_HEADER__ */
+#endif /* __TGSOH_UTIL_HEADER__ */

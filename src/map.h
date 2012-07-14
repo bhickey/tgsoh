@@ -1,6 +1,7 @@
 #ifndef __TGSOH_MAP_HEADER__
 #define __TGSOH_MAP_HEADER__
 
+#include <map>
 #include <vector>
 #include <iostream>
 #include "enums.h"
@@ -39,6 +40,11 @@ class Map
     width_ = height_ = 0;
     robot_x_ = robot_y_ = 0;
     remaining_lambdas_ = 0;
+    linkages_ = std::vector<int>(9, -1);
+    targets_ = std::vector<int>(9, 0 );
+    targets_loc_ = std::map<int, int>();
+    trampolines_ = std::vector<int>(9, 0);
+    trampolines_loc_ = std::map<int, int>();
   }
 
   const Terrain& terrain(int x, int y) const { return map_[x+y*width_]; }
@@ -57,12 +63,37 @@ class Map
   int robot_x() const { return robot_x_; }
   int robot_y() const { return robot_y_; }
 
+  void setTrampoline(int trampoline, int location) {
+    trampolines_[trampoline] = location;
+    trampolines_loc_.insert(std::pair<int, int>(location, trampoline));
+    if (trampolines_loc_.find(location)->second != trampoline) {
+      std::cerr << "fuck";
+    }
+  }
+
+  int getTrampoline(const int x, const int y) const {
+    return trampolines_loc_.find(x+y*width_)->second;
+  }
+
+  void setTarget(const int target, const int location) {
+    targets_[target] = location;
+    targets_loc_.insert(std::pair<int, int>(location, target));
+  }
+
+  int getTarget(const int x, const int y) const {
+    return targets_loc_.find(x+y*width_)->second;
+  }
+
+  void setLinkage(const int from, const int to) {
+    linkages_[from] = to;
+  }
+
  private:
   int width_, height_;
   int robot_x_, robot_y_;
   int remaining_lambdas_;
-
- private:
+  std::vector<int> trampolines_, targets_, linkages_;
+  std::map<int,int> trampolines_loc_, targets_loc_;
   std::vector<Terrain> map_;
 
   bool DoResolvedMove(ResolvedMove move, Delta *delta);

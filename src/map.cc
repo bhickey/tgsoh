@@ -19,6 +19,7 @@ bool Map::ReadFromStdin() {
     ascii_map.push_back(line);
   }
 
+  size_t trampoline_index = 0, target_index = 0;
   // c++11 style would be: for(const string& line : ascii_map) {
   for (size_t j=0; j<ascii_map.size(); j++) {
     const string& line = ascii_map[j];
@@ -58,9 +59,11 @@ bool Map::ReadFromStdin() {
         case 'H':
         case 'I':
           map_.push_back(TRAMPOLINE);
-          //TODO set metadata
+          trampoline_index = line[i] - 'A';
+          setTrampoline(trampoline_index, map_.size()); 
+          cerr << "Setting trampoline " << map_.size() << " to " << target_index << endl;
           break;
-        case '1':
+        case '1':    // target (teleport exit)
         case '2':
         case '3':
         case '4':
@@ -70,7 +73,9 @@ bool Map::ReadFromStdin() {
         case '8':
         case '9':
           map_.push_back(TARGET);
-          //TODO set metadata
+          target_index = line[i] - '1';
+          cerr << "Setting target " << map_.size() << " to " << target_index << endl;
+          setTarget(target_index, map_.size()); 
           break;
         default:
           cerr << "Unrecognized map character " << line[i] << endl;
@@ -92,8 +97,20 @@ ostream& operator<<(ostream& ostr, const Map& m) {
     for (int i=0; i<m.width(); i++) {
       if (m.robot_x() == i && m.robot_y() == j)
         ostr << 'R';
-      else
-        ostr << TerrainChar[static_cast<int>(m.terrain(i,j))];
+      else {
+        Terrain terrain = m.terrain(i,j);
+        switch (terrain) {
+          case TARGET:
+            ostr << (char) ('1' + m.getTarget(i,j));
+            break;
+          case TRAMPOLINE:
+            ostr << (char) ('A' + m.getTrampoline(i,j));
+            break;
+          default:
+            ostr << TerrainChar[static_cast<int>(terrain)];
+            break;
+        }
+      }
     }
     ostr << endl;
   }
@@ -116,9 +133,10 @@ bool State::ReadFromStdin() {
         if (line[0] == 'W') {
           water_proof_ = atoi(value);
         } else {
-          //TODO store the teleporter. 
+          int trampoline = value[0] - 'A';
           cin >> line >> value;
-          //TODO store the target.
+          int target = value[0] - '1';
+          map_.setLinkage(trampoline, target);
         }
         break;
     }
