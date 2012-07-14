@@ -122,6 +122,7 @@ bool State::ReadFromStdin() {
   string line;
   string value;
   while(cin >> line >> value) {
+    cerr << line.size() << endl;
     switch (line.size()) {
       case 5:   //Water
         init_water_ = atoi(value);

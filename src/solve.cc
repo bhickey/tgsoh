@@ -15,12 +15,13 @@ void output (int param) {
 int main()
 {
   signal(SIGINT, output);
-  Map map;
-  if (!map.ReadFromStdin()) {
-    cerr << "can't read map\n";
+  State state;
+  if (!state.ReadFromStdin()) {
+    cerr << "can't read state\n";
     cout << "A\n";
-    return -1;
+    return -1; 
   }
+  Map map = state.map();
   cerr << map.width() << "x" << map.height() << endl;
   cerr << map;
 

@@ -116,7 +116,7 @@ class State
   bool ReadFromStdin();
   void Rollback();
   LifeStatus MakeMove(Move move);
-
+  Map map() { return map_; }
  private:
   Map map_;
   int turn_, flood_rate_, init_water_, water_proof_, water_count_;
