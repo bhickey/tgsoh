@@ -48,6 +48,30 @@ bool Map::ReadFromStdin() {
         case 'L':   // exit (lambda lift)
           map_.push_back(EXIT);
           break;
+        case 'A':   // trampoline (teleport entrance)
+        case 'B':
+        case 'C':
+        case 'D':
+        case 'E':
+        case 'F':
+        case 'G':
+        case 'H':
+        case 'I':
+          map_.push_back(TRAMPOLINE);
+          //TODO set metadata
+          break;
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+          map_.push_back(TARGET);
+          //TODO set metadata
+          break;
         default:
           cerr << "Unrecognized map character " << line[i] << endl;
           return false;
