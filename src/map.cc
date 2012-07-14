@@ -28,6 +28,7 @@ bool Map::ReadFromStdin() {
           break;
         case '\\':  // lambda
           map_.push_back(LAMBDA);
+          remaining_lambdas_ ++;
           break;
         case '*':   // rock
           map_.push_back(ROCK);
@@ -44,9 +45,211 @@ bool Map::ReadFromStdin() {
     }
     height_ ++;
   }
+  return true;
+}
+
+bool State::ReadFromStdin() {
+  map_.ReadFromStdin();
+  
   // TODO: flooding metadata
   //while(cin >> line) {
   //}
   return true;
 }
+
+
+Delta Map::MakeMove(Move move) {
+  ResolvedMove move_r = ResolveMove(move);
+  Delta delta;
+  bool rock_fell_on_head = DoResolvedMove(move_r, delta);
+
+  return delta; //TODO
+}
+
+Terrain Map::TerrainAt(int x, int y) {
+  return map_[y * width_ + x];
+}
+
+void Map::SetTerrainAt(int x, int y, Terrain terrain) {
+  map_[y * width_ + x] = terrain;
+}
+
+bool Map::DoResolvedMove(ResolvedMove move, Delta delta) {
+
+  int new_x = robot_x_, new_y = robot_y_;
+  int new_rock_x = robot_x_, new_rock_y = robot_y_;
+  bool push = false;
+  switch (move) {
+    case PUSH_LEFT_R:
+      push = true;
+      new_rock_x -= 2;
+      // fallthrough
+    case LEFT_R:
+      new_x -= 1;
+      break;
+    case PUSH_RIGHT_R:
+      push = true;
+      new_rock_x += 2;
+      // fallthrough
+    case RIGHT_R:
+      new_x += 1;
+      break;
+    case UP_R:
+      new_y -= 1;
+      break;
+    case DOWN_R:
+      new_y += 1;
+      break;
+    case WAIT_R:
+      // Do Nothing. 
+      break;
+  }
+
+  //Copy old locations
+  //rocks are set in update
+  delta.old_terrain_ = TerrainAt(new_x, new_y);
+  delta.old_robot_x_ = robot_x_;
+  delta.old_robot_y_ = robot_y_;
+  delta.move_ = move;
+
+  if (TerrainAt(new_x, new_y) != EXIT)
+    SetTerrainAt(new_x, new_y, AIR);
+  if (push)
+    SetTerrainAt(new_rock_x, new_rock_y, ROCK);
+  robot_x_ = new_x;
+  robot_y_ = new_y;
+
+  return Update(delta);
+}
+
+bool Map::Update(Delta delta) {
+  //Updating from right to left is OK because it is equivalent
+  vector<Terrain> new_map(map_);
+
+  for (int i = width_ * height_ - 1; i >= 0; i--) {
+    if (map_[i] == ROCK) {
+      int left_index = i-1;
+      int right_index = i+1;
+      int left_down_index = i-1+width_;
+      int down_index = i+width_;
+      int right_down_index = i+1+width_;
+      Terrain left = map_[left_index];
+      Terrain right = map_[right_index];
+      Terrain left_down = map_[left_down_index];
+      Terrain down = map_[down_index];
+      Terrain right_down = map_[right_down_index];
+
+      if (down == AIR) {
+        new_map[i] = AIR;
+        new_map[down_index] = ROCK;
+      } else if (down == ROCK) {
+        if (right == AIR && right_down == AIR) {
+          new_map[i] = AIR;
+          new_map[right_down_index] = ROCK;
+        } else if (left == AIR && left_down == AIR) {
+          new_map[i] = AIR;
+          new_map[left_down_index] = ROCK;
+        }
+      } else if (down == LAMBDA) {
+        if (right == AIR && right_down == AIR) {
+          new_map[i] = AIR;
+          new_map[right_down_index] = ROCK;
+        }
+      }
+    }
+  }
+  //TODO add the rocks to delta
+  
+
+  //TODO avoid the copy here
+  map_ = new_map;
+
+  //TODO Did a rock fall on your head?
+  return false;
+}
+
+ResolvedMove Map::ResolveMove(Move move) {
+  if (move == WAIT || move == ABORT)
+    return WAIT_R;
+
+  int change_x = 0, change_y = 0;
+  switch (move) {
+    case LEFT:
+      change_x = -1;
+      break;
+    case RIGHT:
+      change_x = 1;
+      break;
+    case UP:
+      change_y = -1;
+      break;
+    case DOWN:
+      change_y = 1;
+      break;
+    case WAIT:
+    case ABORT:
+      //Should never happen
+      return WAIT_R;
+  }
+
+  int new_x = robot_x_ + change_x;
+  int new_y = robot_y_ + change_y;
+
+  Terrain new_space = TerrainAt(new_x,new_y);
+
+  switch (new_space) {
+    case EXIT:
+      if (remaining_lambdas_ != 0) {
+        return WAIT_R;
+      }
+      //fall through
+    case AIR:
+    case LAMBDA:
+    case EARTH:
+      switch (move) {
+        case LEFT:
+          return LEFT_R;
+        case RIGHT:
+          return RIGHT_R;
+        case UP:
+          return UP_R;
+        case DOWN:
+          return DOWN_R;
+        case WAIT:
+        case ABORT:
+          //Should never happen
+          return WAIT_R;
+      }
+    case WALL:
+      return WAIT_R;
+    case ROCK:
+      switch (move) {
+        case UP:
+        case DOWN:
+          return WAIT_R;
+        case WAIT:
+        case ABORT:
+          //Should never happen
+          return WAIT_R;
+        case LEFT:
+        case RIGHT:
+          int new_rock_x = new_x + change_x;
+          int new_rock_y = new_y;
+          bool can_push = TerrainAt(new_rock_x, new_rock_y) == AIR;
+          if (can_push) {
+            return (move == LEFT) ? PUSH_LEFT_R : PUSH_RIGHT_R;
+          } else {
+            return WAIT_R;
+          }
+      }
+  }
+
+  //Should never happen
+  return WAIT_R;
+}
+
+
+
+
+
 
