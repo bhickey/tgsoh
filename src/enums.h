@@ -9,6 +9,6 @@ enum Terrain { EARTH = 0, EMPTY, EXIT, LAMBDA, ROCK, TARGET, TRAMPOLINE, WALL };
 static const int MoveDX[] = { -1, 1, 0, 0, 0, 0 };
 static const int MoveDY[] = { 0, 0, -1, 1, 0, 0 };
 
-static const char TerrainChar[] = { '.', ' ', 'X', '\\', '*', '#' };
+static const char TerrainChar[] = { '.', ' ', 'X', '\\', '*', '>', '<', '#' };
 
 #endif /* __TGSOH_ENUMS_HEADER__ */
