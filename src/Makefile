@@ -1,5 +1,5 @@
 OBJS = $(patsubst %.cc,%.o,$(wildcard *.cc))
-TARGET = solve
+TARGET = main
 CXXFLAGS = -Wall -g -O3
 LDFLAGS =
 CXX = g++

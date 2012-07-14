@@ -3,7 +3,7 @@
 
 using namespace std;
 
-int main()
+int solve()
 {
   Map map;
   if (!map.ReadFromStdin()) {
