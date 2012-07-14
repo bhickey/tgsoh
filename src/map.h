@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include "io.h"
 #include "enums.h"
 
 class Delta

@@ -103,17 +103,23 @@ ostream& operator<<(ostream& ostr, const Map& m) {
 bool State::ReadFromStdin() {
   map_.ReadFromStdin();
   string line;
-  int value;
+  string value;
   while(cin >> line >> value) {
     switch (line.size()) {
       case 5:   //Water
-        water_ = value;
+        water_ = atoi(value);
         break;
       case 8:   //Flooding
-        flood_rate_ = value;
+        flood_rate_ = atoi(value);
         break;
-      case 10:  //Waterproof
-        water_proof_ = value;
+      case 10:  //Waterproof or Trampoline
+        if (line[0] == 'W') {
+          water_proof_ = atoi(value);
+        } else {
+          //TODO store the teleporter. 
+          cin >> line >> value;
+          //TODO store the target.
+        }
         break;
     }
   }

@@ -3,6 +3,8 @@
 *.lo
 *.o
 
+*.gch
+
 # Compiled Dynamic libraries
 *.so
 
