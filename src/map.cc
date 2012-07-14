@@ -58,9 +58,9 @@ bool Map::ReadFromStdin() {
         case 'G':
         case 'H':
         case 'I':
+          setTrampoline(trampoline_index, map_.size()); 
           map_.push_back(TRAMPOLINE);
           trampoline_index = line[i] - 'A';
-          setTrampoline(trampoline_index, map_.size()); 
           cerr << "Setting trampoline " << map_.size() << " to " << target_index << endl;
           break;
         case '1':    // target (teleport exit)
@@ -72,10 +72,10 @@ bool Map::ReadFromStdin() {
         case '7':
         case '8':
         case '9':
+          setTarget(target_index, map_.size()); 
           map_.push_back(TARGET);
           target_index = line[i] - '1';
           cerr << "Setting target " << map_.size() << " to " << target_index << endl;
-          setTarget(target_index, map_.size()); 
           break;
         default:
           cerr << "Unrecognized map character " << line[i] << endl;

@@ -66,9 +66,6 @@ class Map
   void setTrampoline(int trampoline, int location) {
     trampolines_[trampoline] = location;
     trampolines_loc_.insert(std::pair<int, int>(location, trampoline));
-    if (trampolines_loc_.find(location)->second != trampoline) {
-      std::cerr << "fuck";
-    }
   }
 
   int getTrampoline(const int x, const int y) const {
