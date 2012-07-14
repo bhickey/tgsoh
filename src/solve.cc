@@ -17,14 +17,21 @@ int main()
     cout << "A\n";
     return -1;
   }
-  cerr << map.width() << "x" << map.height() << endl;
+  cerr << map.width_ << "x" << map.height_ << endl;
   cerr << map;
 
-  while (true)
-  {
-    // spin wheels
-  }
+  Delta d;
+  map.MakeMove(RIGHT, &d);
+  cerr << map;
+  map.MakeMove(RIGHT, &d);
+  cerr << map;
+  map.MakeMove(RIGHT, &d);
+  cerr << map;
 
+#if 0
+  while(true) {
+   // do the stuff that matters
+  }
+#endif
   return 0;
 }
-

@@ -53,9 +53,12 @@ bool Map::ReadFromStdin() {
 }
 
 ostream& operator<<(ostream& ostr, const Map& m) {
-  for (int j=0; j<m.height(); j++) {
-    for (int i=0; i<m.width(); i++) {
-      ostr << TerrainChar[static_cast<int>(m.terrain(i,j))];
+  for (int j=0; j<m.height_; j++) {
+    for (int i=0; i<m.width_; i++) {
+      if (m.robot_x_ == i && m.robot_y_ == j)
+        ostr << 'R';
+      else
+        ostr << TerrainChar[static_cast<int>(m.terrain(i,j))];
     }
     ostr << endl;
   }

@@ -17,11 +17,10 @@ class Delta
     old_robot_x_ = old_robot_y_ = 0;
   }
 
-
- Terrain old_terrain_;
- std::vector<std::pair<int,RockFall> > rocks_;
- int old_robot_x_, old_robot_y_;
- ResolvedMove move_;
+  Terrain old_terrain_;
+  std::vector<std::pair<int,RockFall> > rocks_;
+  int old_robot_x_, old_robot_y_;
+  ResolvedMove move_;
 
  private:
 };
@@ -48,13 +47,11 @@ class Map
   bool MakeMove(Move move, Delta *delta);
   ResolvedMove ResolveMove(Move move);
 
-  int width() const { return width_; }
-  int height() const { return height_; }
-
- private:
   int width_, height_;
   int robot_x_, robot_y_;
   int remaining_lambdas_;
+
+ private:
   std::vector<Terrain> map_;
 
   bool DoResolvedMove(ResolvedMove move, Delta *delta);

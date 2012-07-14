@@ -19,5 +19,6 @@ $(TARGET): $(OBJS)
 # update below with makedepend *.cc
 # DO NOT DELETE
 
+main.o: map.h enums.h
 map.o: map.h enums.h
 solve.o: map.h enums.h
