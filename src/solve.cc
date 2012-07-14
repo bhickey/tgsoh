@@ -21,7 +21,7 @@ int main()
     cout << "A\n";
     return -1;
   }
-  cerr << map.width_ << "x" << map.height_ << endl;
+  cerr << map.width() << "x" << map.height() << endl;
   cerr << map;
 
   Delta d;

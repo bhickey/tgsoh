@@ -79,7 +79,7 @@ bool Map::ReadFromStdin() {
     }
 
     // Right-fill any short lines (e.g. in maps/flood4.map)
-    for (int k=0; k<width_ - line.length(); k++)
+    for (unsigned int k=0; k<width_ - line.length(); k++)
       map_.push_back(EMPTY);
 
     height_ ++;
@@ -88,9 +88,9 @@ bool Map::ReadFromStdin() {
 }
 
 ostream& operator<<(ostream& ostr, const Map& m) {
-  for (int j=0; j<m.height_; j++) {
-    for (int i=0; i<m.width_; i++) {
-      if (m.robot_x_ == i && m.robot_y_ == j)
+  for (int j=0; j<m.height(); j++) {
+    for (int i=0; i<m.width(); i++) {
+      if (m.robot_x() == i && m.robot_y() == j)
         ostr << 'R';
       else
         ostr << TerrainChar[static_cast<int>(m.terrain(i,j))];
@@ -107,7 +107,7 @@ bool State::ReadFromStdin() {
   while(cin >> line >> value) {
     switch (line.size()) {
       case 5:   //Water
-        water_ = atoi(value);
+        init_water_ = atoi(value);
         break;
       case 8:   //Flooding
         flood_rate_ = atoi(value);
@@ -126,15 +126,52 @@ bool State::ReadFromStdin() {
   return true;
 }
 
+LifeStatus State::MakeMove(Move move) {
+  Delta delta;
+  delta.old_water_count_ = water_count_;
+  bool rock_fell = map_.MakeMove(move, &delta);
 
-bool Map::MakeMove(Move move, Delta *delta) {
-  ResolvedMove move_r = ResolveMove(move);
-  bool rock_fell_on_head = DoResolvedMove(move_r, delta);
+  history_.push_back(delta);
+  collected_lambdas_ += (delta.old_terrain_ == LAMBDA) ? 1 : 0;
+  turn_ ++;
+  if ((map_.height() - map_.robot_y()) > init_water_ + (turn_ / flood_rate_)) {
+    water_count_ ++;
+  } else {
+    water_count_ = 0;
+  }
 
-  return true; //TODO
+
+  if (delta.old_terrain_ == EXIT) {
+    return EXITED;
+  } else if (move == ABORT) {
+    return ABORTED;
+  } else if (rock_fell || water_count_ > water_proof_) {
+    return DIED;
+  } else {
+    return ALIVE;
+  }
 }
 
-bool Map::DoResolvedMove(ResolvedMove move, Delta *delta) {
+void State::Rollback() {
+  Delta& delta = history_.back();
+  turn_--;
+  water_count_ = delta.old_water_count_;
+  collected_lambdas_ -= (delta.old_terrain_ == LAMBDA) ? 1 : 0;
+
+  map_.Rollback(delta);
+  history_.pop_back();
+}
+
+
+
+bool Map::MakeMove(Move move, Delta* delta) {
+  ResolvedMove move_r = ResolveMove(move);
+  bool rock_fell = DoResolvedMove(move_r, delta);
+
+  return rock_fell;
+}
+
+bool Map::DoResolvedMove(ResolvedMove move, Delta* delta) {
   int new_x = robot_x_, new_y = robot_y_;
   int new_rock_x = robot_x_, new_rock_y = robot_y_;
   bool push = false;
@@ -175,16 +212,33 @@ bool Map::DoResolvedMove(ResolvedMove move, Delta *delta) {
     terrain(new_x, new_y) = EMPTY;
   if (push)
     terrain(new_rock_x, new_rock_y) = ROCK;
+
   robot_x_ = new_x;
   robot_y_ = new_y;
 
   return Update(delta);
 }
 
+void Map::Rollback(const Delta& delta) {
+  vector<int>::const_iterator itr;
+  for (itr = delta.new_rocks_.begin(); itr != delta.new_rocks_.end(); itr++) {
+    map_[*itr] = EMPTY;
+  }
+  for (itr = delta.old_rocks_.begin(); itr != delta.old_rocks_.end(); itr++) {
+    map_[*itr] = ROCK;
+  }
+
+  terrain(robot_x_,robot_y_) = delta.old_terrain_;
+  if (delta.move_ == PUSH_RIGHT_R || delta.move_ == PUSH_LEFT_R) {
+    terrain(robot_x_ + (delta.move_ == PUSH_RIGHT_R ? 1 : -1), robot_y_) = EMPTY;
+  }
+  robot_x_ = delta.old_robot_x_;
+  robot_y_ = delta.old_robot_y_;
+}
+
+
 bool Map::Update(Delta *delta) {
   //Updating from right to left is OK because it is equivalent
-  vector<Terrain> new_map(map_);
-
   for (int i = width_ * height_ - 1; i >= 0; i--) {
     if (map_[i] == ROCK) {
       int left_index = i-1;
@@ -199,32 +253,37 @@ bool Map::Update(Delta *delta) {
       Terrain right_down = map_[right_down_index];
 
       if (down == EMPTY) {
-        new_map[i] = EMPTY;
-        new_map[down_index] = ROCK;
+        delta->old_rocks_.push_back(i);
+        delta->new_rocks_.push_back(down_index);
       } else if (down == ROCK) {
         if (right == EMPTY && right_down == EMPTY) {
-          new_map[i] = EMPTY;
-          new_map[right_down_index] = ROCK;
+          delta->old_rocks_.push_back(i);
+          delta->new_rocks_.push_back(right_down_index);
         } else if (left == EMPTY && left_down == EMPTY) {
-          new_map[i] = EMPTY;
-          new_map[left_down_index] = ROCK;
+          delta->old_rocks_.push_back(i);
+          delta->new_rocks_.push_back(left_down_index);
         }
       } else if (down == LAMBDA) {
         if (right == EMPTY && right_down == EMPTY) {
-          new_map[i] = EMPTY;
-          new_map[right_down_index] = ROCK;
+          delta->old_rocks_.push_back(i);
+          delta->new_rocks_.push_back(right_down_index);
         }
       }
     }
   }
-  //TODO add the rocks to delta
 
+  bool rock_fell_on_head = false;
+  vector<int>::const_iterator itr;
+  for (itr = delta->new_rocks_.begin() ; itr != delta->new_rocks_.end(); itr++) {
+    map_[*itr] = ROCK;
+    if (*itr + width_ == (robot_y_ * width_ + robot_x_))
+      rock_fell_on_head = true;
+  }
+  for (itr = delta->old_rocks_.begin() ; itr != delta->old_rocks_.end(); itr++) {
+    map_[*itr] = EMPTY;
+  }
 
-  //TODO avoid the copy here
-  map_ = new_map;
-
-  //TODO Did a rock fall on your head?
-  return false;
+  return rock_fell_on_head;
 }
 
 ResolvedMove Map::ResolveMove(Move move) {
@@ -284,6 +343,10 @@ ResolvedMove Map::ResolveMove(Move move) {
             return WAIT_R;
           }
       }
+    case TARGET:
+    case TRAMPOLINE:
+      //TODO implement
+      return WAIT_R;
   }
 
   //Should never happen

@@ -3,12 +3,14 @@
 
 enum Move { LEFT = 0, RIGHT, UP, DOWN, WAIT, ABORT };
 enum ResolvedMove { LEFT_R, RIGHT_R, UP_R, DOWN_R, WAIT_R, PUSH_LEFT_R, PUSH_RIGHT_R };
-enum RockFall {FALL_DOWN, FALL_RIGHT, FALL_LEFT, FALL_LEFT_RIGHT};
+enum RockFall {FALL_DOWN, FALL_RIGHT, FALL_LEFT};
 enum Terrain { EARTH = 0, EMPTY, EXIT, LAMBDA, ROCK, TARGET, TRAMPOLINE, WALL };
 
 static const int MoveDX[] = { -1, 1, 0, 0, 0, 0 };
 static const int MoveDY[] = { 0, 0, -1, 1, 0, 0 };
 
 static const char TerrainChar[] = { '.', ' ', 'X', '\\', '*', '>', '<', '#' };
+
+enum LifeStatus { EXITED, ABORTED, DIED, ALIVE };
 
 #endif /* __TGSOH_ENUMS_HEADER__ */

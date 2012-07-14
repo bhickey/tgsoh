@@ -14,14 +14,17 @@ class Delta
 
   void Init() {
     old_terrain_ = EMPTY;
+    old_water_count_ = 0;
     move_ = WAIT_R;
     old_robot_x_ = old_robot_y_ = 0;
   }
 
-  Terrain old_terrain_;
-  std::vector<std::pair<int,RockFall> > rocks_;
-  int old_robot_x_, old_robot_y_;
-  ResolvedMove move_;
+ Terrain old_terrain_;
+ std::vector<int> new_rocks_;
+ std::vector<int> old_rocks_;
+ int old_water_count_;
+ int old_robot_x_, old_robot_y_;
+ ResolvedMove move_;
 
  private:
 };
@@ -47,7 +50,14 @@ class Map
 
   bool MakeMove(Move move, Delta *delta);
   ResolvedMove ResolveMove(Move move);
+  void Rollback(const Delta& delta);
 
+  int width() const { return width_; }
+  int height() const { return height_; }
+  int robot_x() const { return robot_x_; }
+  int robot_y() const { return robot_y_; }
+
+ private:
   int width_, height_;
   int robot_x_, robot_y_;
   int remaining_lambdas_;
@@ -68,17 +78,19 @@ class State
   ~State() { }
 
   void Init() {
-    turn_ = flood_rate_ = water_ = water_proof_ = 0;
+    turn_ = flood_rate_ = init_water_ = water_proof_ = water_count_ = 0;
     collected_lambdas_ = 0;
   }
 
   bool ReadFromStdin();
-  Delta MakeMove(Move move);
+  void Rollback();
+  LifeStatus MakeMove(Move move);
 
  private:
   Map map_;
-  int turn_, flood_rate_, water_, water_proof_;
+  int turn_, flood_rate_, init_water_, water_proof_, water_count_;
   int collected_lambdas_;
+  std::vector<Delta> history_;
 };
 
 
