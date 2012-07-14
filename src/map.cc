@@ -149,15 +149,15 @@ bool Map::Update(Delta delta) {
         new_map[i] = EMPTY;
         new_map[down_index] = ROCK;
       } else if (down == ROCK) {
-        if (right == EMPTY && right_down == AIR) {
+        if (right == EMPTY && right_down == EMPTY) {
           new_map[i] = EMPTY;
           new_map[right_down_index] = ROCK;
-        } else if (left == EMPTY && left_down == AIR) {
+        } else if (left == EMPTY && left_down == EMPTY) {
           new_map[i] = EMPTY;
           new_map[left_down_index] = ROCK;
         }
       } else if (down == LAMBDA) {
-        if (right == EMPTY && right_down == AIR) {
+        if (right == EMPTY && right_down == EMPTY) {
           new_map[i] = EMPTY;
           new_map[right_down_index] = ROCK;
         }
