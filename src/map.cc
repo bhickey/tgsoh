@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <vector>
 #include "map.h"
 
 using namespace std;
@@ -8,15 +9,20 @@ bool Map::ReadFromStdin() {
   height_ = 0;
 
   string line;
+  vector<string> ascii_map;
   while (getline(cin, line)) {
-    if (line.size() <= 1) {
+    if (line.length() == 0) {
       // empty line -> end of map; start parsing metadata, if any
       break;
     }
-    if (width_ == 0) width_ = line.length();
-    // cout << "line " << height_ << " size " << line.length() << " " << line << endl;
+    width_ = max(width_, (int) line.length());
+    ascii_map.push_back(line);
+  }
 
-    for (unsigned i=0; i<line.size(); i++) {
+  // c++11 style would be: for(const string& line : ascii_map) {
+  for (size_t j=0; j<ascii_map.size(); j++) {
+    const string& line = ascii_map[j];
+    for (unsigned i=0; i<line.length(); i++) {
       switch (line[i]) {
         case '#':   // Wall
           map_.push_back(WALL);
@@ -47,6 +53,11 @@ bool Map::ReadFromStdin() {
           return false;
       }
     }
+
+    // Right-fill any short lines (e.g. in maps/flood4.map)
+    for (int k=0; k<width_ - line.length(); k++)
+      map_.push_back(EMPTY);
+
     height_ ++;
   }
   return true;
