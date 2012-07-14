@@ -11,7 +11,7 @@ class Delta
   ~Delta() { }
 
   void Init() {
-    old_terrain_ = AIR;
+    old_terrain_ = EMPTY;
     move_ = WAIT_R;
     old_robot_x_ = old_robot_y_ = 0;
   }

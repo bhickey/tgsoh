@@ -22,7 +22,7 @@ bool Map::ReadFromStdin() {
           map_.push_back(WALL);
           break;
         case ' ':   // air
-          map_.push_back(AIR);
+          map_.push_back(EMPTY);
           break;
         case '.':   // earth
           map_.push_back(EARTH);
@@ -35,7 +35,7 @@ bool Map::ReadFromStdin() {
           map_.push_back(ROCK);
           break;
         case 'R':   // robot location (air underneath)
-          map_.push_back(AIR);
+          map_.push_back(EMPTY);
           robot_x_ = i;
           robot_y_ = height_;
           break;
@@ -119,7 +119,7 @@ bool Map::DoResolvedMove(ResolvedMove move, Delta delta) {
   delta.move_ = move;
 
   if (terrain(new_x, new_y) != EXIT)
-    terrain(new_x, new_y) = AIR;
+    terrain(new_x, new_y) = EMPTY;
   if (push)
     terrain(new_rock_x, new_rock_y) = ROCK;
   robot_x_ = new_x;
@@ -145,20 +145,20 @@ bool Map::Update(Delta delta) {
       Terrain down = map_[down_index];
       Terrain right_down = map_[right_down_index];
 
-      if (down == AIR) {
-        new_map[i] = AIR;
+      if (down == EMPTY) {
+        new_map[i] = EMPTY;
         new_map[down_index] = ROCK;
       } else if (down == ROCK) {
-        if (right == AIR && right_down == AIR) {
-          new_map[i] = AIR;
+        if (right == EMPTY && right_down == AIR) {
+          new_map[i] = EMPTY;
           new_map[right_down_index] = ROCK;
-        } else if (left == AIR && left_down == AIR) {
-          new_map[i] = AIR;
+        } else if (left == EMPTY && left_down == AIR) {
+          new_map[i] = EMPTY;
           new_map[left_down_index] = ROCK;
         }
       } else if (down == LAMBDA) {
-        if (right == AIR && right_down == AIR) {
-          new_map[i] = AIR;
+        if (right == EMPTY && right_down == AIR) {
+          new_map[i] = EMPTY;
           new_map[right_down_index] = ROCK;
         }
       }
@@ -209,7 +209,7 @@ ResolvedMove Map::ResolveMove(Move move) {
         return WAIT_R;
       }
       //fall through
-    case AIR:
+    case EMPTY:
     case LAMBDA:
     case EARTH:
       switch (move) {
@@ -241,7 +241,7 @@ ResolvedMove Map::ResolveMove(Move move) {
         case RIGHT:
           int new_rock_x = new_x + change_x;
           int new_rock_y = new_y;
-          bool can_push = terrain(new_rock_x, new_rock_y) == AIR;
+          bool can_push = terrain(new_rock_x, new_rock_y) == EMPTY;
           if (can_push) {
             return (move == LEFT) ? PUSH_LEFT_R : PUSH_RIGHT_R;
           } else {
