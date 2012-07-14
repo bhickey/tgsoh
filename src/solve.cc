@@ -3,8 +3,14 @@
 
 using namespace std;
 
-int solve()
+void output (int param) {
+  cout << "A";
+  exit(0);
+}
+
+int main()
 {
+  signal(SIGINT, output);
   Map map;
   if (!map.ReadFromStdin()) {
     cerr << "can't read map\n";
@@ -13,6 +19,11 @@ int solve()
   }
   cerr << map.width() << "x" << map.height() << endl;
   cerr << map;
+
+  while (true)
+  {
+    // spin wheels
+  }
 
   return 0;
 }

@@ -1,4 +1,4 @@
-TARGET = main
+TARGET = solve
 OBJS = $(patsubst %.cc,%.o,$(wildcard *.cc))
 HEADERS = $(wildcard *.h)
 CXXFLAGS = -Wall -g -O3
